@@ -7,17 +7,42 @@ import numpy as np
 import copy
 from collections import deque
 from typing import Optional
-import warnings
 
 
 def grad1(nu: np.ndarray, step_size: float, grad: np.ndarray, iter_num: int):
-    """Gradient update with constant step size."""
+    """
+    Gradient update with constant step size.
+
+    Args
+    ----
+    nu: numpy.array
+        A Lagrange multiplier.
+    step_size: float
+        Step size taken in the direction of `grad`.
+    grad: numpy.array
+        Gradient.
+    iter_num: int
+        Iteration number. Not used here, it is included for convenience.
+    """
 
     return nu + step_size * grad
 
 
 def grad2(nu: np.ndarray, step_size: float, grad: np.ndarray, iter_num: int):
-    """Gradient update with constant step length."""
+    """
+    Gradient update with constant step length.
+
+    Args
+    ----
+    nu: numpy.array
+        A Lagrange multiplier.
+    step_size: float
+        Step size taken in the direction of `grad`.
+    grad: numpy.array
+        Gradient.
+    iter_num: int
+        Iteration number. Not used here, it is included for convenience.
+    """
 
     grad_norm = np.linalg.norm(grad)
     if grad_norm > 1e-10:
@@ -27,7 +52,20 @@ def grad2(nu: np.ndarray, step_size: float, grad: np.ndarray, iter_num: int):
 
 
 def grad3(nu: np.ndarray, step_size: float, grad: np.ndarray, iter_num: int):
-    """Gradient update modulated by the iteration number."""
+    """
+    Gradient update modulated by the iteration number.
+
+    Args
+    ----
+    nu: numpy.array
+        A Lagrange multiplier.
+    step_size: float
+        Step size taken in the direction of `grad`.
+    grad: numpy.array
+        Gradient.
+    iter_num: int
+        Current iteration number.
+    """
 
     return nu + (step_size / iter_num) * grad
 
@@ -429,7 +467,7 @@ class Edge:
         self.multipliers[self.j.id] = initial_multipliers
 
 
-class VectorizedGraph:
+class InteractionGraph:
     """Main structure for the vectorized implementation of our distributed algorithm. Accepts arbitrary graphs."""
 
     def __init__(
@@ -1104,7 +1142,7 @@ class VectorizedGraph:
             The best energy achieved during the calculation.
         best_iter: int
             The iteration at which the best dual value was found.
-        optimal_graph: VectorizedGraph
+        optimal_graph: InteractionGraph
             The graph object which attained the best dual value.
         dual_vals: list[float]
             A list of the dual value achieved per iteration. Has `num_iters` entries unless there was an early stop caused by `stop_tol` and `stop_patience`.
@@ -1112,16 +1150,10 @@ class VectorizedGraph:
         use_momentum = solver == "momentum"
         use_smooth = solver == "smooth"
 
-        # Initialize the multipliers depending on the input.
-        # Default multiplier init: "zeros" for the smooth algorithm, "sparse" otherwise.
+        # Initialize the multipliers depending on the input. Default multiplier init: "zeros" for the smooth algorithm, "sparse" otherwise.
         if multiplier_init_type is None:
             multiplier_init_type = "zeros" if solver == "smooth" else "sparse"
-        if use_smooth and multiplier_init_type != "zeros":
-            warnings.warn(
-                UserWarning(
-                    "The Lagrange multipliers for the smooth algorithm should be initialized to zero."
-                )
-            )
+
         self.initialize_multipliers(
             multiplier_init_type,
             multiplier_norm=multiplier_norm,
