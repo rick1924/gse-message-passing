@@ -1,0 +1,1 @@
+Container for the message passing algorithms mentioned in ["Local Relaxation Hierarchies for Quantum Ground State Energies: Convergence Guarantees and Message Passing Algorithms"](https://arxiv.org/abs/2609.40336)
